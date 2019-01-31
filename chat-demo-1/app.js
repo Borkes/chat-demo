@@ -35,7 +35,7 @@ io.on('connection', function (socket) {
     console.log("handshake:" + JSON.stringify(socket.handshake));
 
     socket.use((packet, next) => { // socket包的中间件
-        console.log("packet>>>" + packet);
+        //console.log("packet>>>" + packet);
         return next();
         // if (packet.doge === true) return next();
         // next(new Error('Not a doge error'));
