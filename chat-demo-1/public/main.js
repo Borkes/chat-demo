@@ -57,7 +57,6 @@ $(function () {
         // Prevent markup from being injected into the message
         message = cleanInput(message);
 		// if there is a non-empty message and a socket connection
-		console.log("sendMessage:" + message + ",connected:" + connected)
         if (message && connected) {
             $inputMessage.val('');
             addChatMessage({
@@ -230,7 +229,6 @@ $(function () {
     // Whenever the server emits 'login', log the login message
     socket.on('login', function (data) {
 		connected = true;
-		console.log("login:" + connected);
         // Display the welcome message
         var message = "Welcome to Socket.IO Chat – ";
         log(message, {

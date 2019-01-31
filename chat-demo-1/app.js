@@ -4,18 +4,18 @@ var app = express();
 var path = require('path');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server, {
-	path: "/websocket",
-	//serveClient: false,
-	pingInterval: 10000,
-	pingTimeout: 5000,
-	cookie: false,
-	transports: ['polling', 'websocket'],
+    path: "/websocket",
+    //serveClient: false,
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    cookie: false,
+    transports: ['polling', 'websocket'],
 
 });
 var port = process.env.PORT || 3000;
 
 server.listen(port, function () {
-	console.log('Server listening at port %d', port);
+    console.log('Server listening at port %d', port);
 });
 
 
@@ -23,75 +23,75 @@ server.listen(port, function () {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function (req, res) {
-	const args = req.query
-	console.log("args:" + args);
+    const args = req.query
+    console.log("args:" + args);
 });
 // Chatroom
 
 var numUsers = 0;
 
 io.on('connection', function (socket) {
-	var addedUser = false;
-	console.log("handshake:" + JSON.stringify(socket.handshake));
+    var addedUser = false;
+    console.log("handshake:" + JSON.stringify(socket.handshake));
 
-	socket.use((packet, next) => { // socket包的中间件
-		console.log("packet>>>" + packet);
-		return next();
-		// if (packet.doge === true) return next();
-		// next(new Error('Not a doge error'));
-	});
+    socket.use((packet, next) => { // socket包的中间件
+        console.log("packet>>>" + packet);
+        return next();
+        // if (packet.doge === true) return next();
+        // next(new Error('Not a doge error'));
+    });
 
-	// when the client emits 'new message', this listens and executes
-	socket.on('new message', function (data) {
-		// we tell the client to execute 'new message'
-		socket.broadcast.emit('new message', { // 和io.emit广播的区别在于，不会发送给自己
-			username: socket.username,
-			message: data
-		});
-	});
+    // when the client emits 'new message', this listens and executes
+    socket.on('new message', function (data) {
+        // we tell the client to execute 'new message'
+        socket.broadcast.emit('new message', { // 和io.emit广播的区别在于，不会发送给自己
+            username: socket.username,
+            message: data
+        });
+    });
 
-	// when the client emits 'add user', this listens and executes
-	socket.on('add user', function (username) {
-		if (addedUser) return;
+    // when the client emits 'add user', this listens and executes
+    socket.on('add user', function (username) {
+        if (addedUser) return;
 
-		// we store the username in the socket session for this client
-		socket.username = username;
-		++numUsers;
-		addedUser = true;
-		socket.emit('login', {
-			numUsers: numUsers
-		});
-		// echo globally (all clients) that a person has connected
-		socket.broadcast.emit('user joined', {
-			username: socket.username,
-			numUsers: numUsers
-		});
-	});
+        // we store the username in the socket session for this client
+        socket.username = username;
+        ++numUsers;
+        addedUser = true;
+        socket.emit('login', {
+            numUsers: numUsers
+        });
+        // echo globally (all clients) that a person has connected
+        socket.broadcast.emit('user joined', {
+            username: socket.username,
+            numUsers: numUsers
+        });
+    });
 
-	// when the client emits 'typing', we broadcast it to others
-	socket.on('typing', function () {
-		socket.broadcast.emit('typing', {
-			username: socket.username
-		});
-	});
+    // when the client emits 'typing', we broadcast it to others
+    socket.on('typing', function () {
+        socket.broadcast.emit('typing', {
+            username: socket.username
+        });
+    });
 
-	// when the client emits 'stop typing', we broadcast it to others
-	socket.on('stop typing', function () {
-		socket.broadcast.emit('stop typing', {
-			username: socket.username
-		});
-	});
+    // when the client emits 'stop typing', we broadcast it to others
+    socket.on('stop typing', function () {
+        socket.broadcast.emit('stop typing', {
+            username: socket.username
+        });
+    });
 
-	// when the user disconnects.. perform this
-	socket.on('disconnect', function () {
-		if (addedUser) {
-			--numUsers;
+    // when the user disconnects.. perform this
+    socket.on('disconnect', function () {
+        if (addedUser) {
+            --numUsers;
 
-			// echo globally that this client has left
-			socket.broadcast.emit('user left', {
-				username: socket.username,
-				numUsers: numUsers
-			});
-		}
-	});
+            // echo globally that this client has left
+            socket.broadcast.emit('user left', {
+                username: socket.username,
+                numUsers: numUsers
+            });
+        }
+    });
 });
