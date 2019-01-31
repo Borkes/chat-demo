@@ -280,4 +280,8 @@ $(function () {
         log('attempt to reconnect has failed');
     });
 
+    socket.on("pong", (data)=>{
+        console.log("pong:" +data);
+    })
+
 });
